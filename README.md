@@ -26,32 +26,141 @@ Les logins et mots de passe seront donnés en cours.
 
 Utiliser la commande "docker pull" pour telecharger l'image docker. Voir https://docs.docker.com/engine/reference/commandline/pull/
 
+	jonathan@blackbox:~$ docker pull 59b7c723.gra7.container-registry.ovh.net/cnamtp/cnamtp:latest
+	latest: Pulling from cnamtp/cnamtp
+	35807b77a593: Already exists 
+	a1b1132ae316: Pull complete 
+	Digest: sha256:7707d94e423c84ae76011a2fda0d8ecf005726c5de6ba751bf59b41bd796f910
+	Status: Downloaded newer image for 59b7c723.gra7.container-registry.ovh.net/cnamtp/cnamtp:latest
+	59b7c723.gra7.container-registry.ovh.net/cnamtp/cnamtp:latest
+	jonathan@blackbox:~$ 
+
+Tagger le container docker, le renommer cnamtp:latest:
+
+	jonathan@blackbox:~$ docker tag 59b7c723.gra7.container-registry.ovh.net/cnamtp/cnamtp:latest cnamtp:latest
+	jonathan@blackbox:~$ 
+
 Utiliser la commande "docker images" pour lister les images telechargées. Quelle est la taille de l'image telechargée ? (Voir https://docs.docker.com/engine/reference/commandline/images/)
+
+	jonathan@blackbox:~$ docker images
+	REPOSITORY                                               TAG                   IMAGE ID       CREATED          SIZE
+	cnamtp                                                   latest                b60f468601ea   14 minutes ago   492MB
+	59b7c723.gra7.container-registry.ovh.net/cnamtp/cnamtp   latest                b60f468601ea   14 minutes ago   492MB
+	jonathan@blackbox:~$ 
 
 ### Lancer l'image docker et se familiariser avec docker
 
 Utiliser la commande "docker run" pour lancer l'image. Voir https://docs.docker.com/engine/reference/commandline/run/
 
+	docker run -it --entrypoint /bin/bash cnamtp
+
 Vérifier que l'image est bian lancée au moyen de la commande "docker ps". Voir https://docs.docker.com/engine/reference/commandline/ps/
+
+	jonathan@blackbox:~$ docker ps
+	CONTAINER ID   IMAGE     COMMAND       CREATED          STATUS          PORTS     NAMES
+	4d4d598da900   cnamtp    "/bin/bash"   46 seconds ago   Up 42 seconds             naughty_bhaskara
+	jonathan@blackbox:~$ 
+
 
 #### Attention: Si vous travaillez dans docker, toute modification est perdue si vous ne sauvegardez pas les résultats au moyen de la commande "docker commit". https://docs.docker.com/engine/reference/commandline/commit/
 
 
 Dans un second terminal, utiliser la commande "docker exec" pour obtenir un shell dans l'environement docker. Voir https://docs.docker.com/engine/reference/commandline/exec/
 
+	jonathan@blackbox:~$ docker ps
+	CONTAINER ID   IMAGE     COMMAND       CREATED          STATUS          PORTS     NAMES
+	4d4d598da900   cnamtp    "/bin/bash"   46 seconds ago   Up 42 seconds             naughty_bhaskara
+	jonathan@blackbox:~$ docker exec -it 4d4d598da900 /bin/bash
+	root@4d4d598da900:/# 
+
+
 Installer build-essential et gdb dans l'environement docker.
+
+	jonathan@blackbox:~$ docker exec -it 4d4d598da900 /bin/bash
+	root@4d4d598da900:/# apt update
+	Get:1 http://archive.ubuntu.com/ubuntu focal InRelease [265 kB]
+	Get:2 http://security.ubuntu.com/ubuntu focal-security InRelease [114 kB]           
+	Get:3 http://archive.ubuntu.com/ubuntu focal-updates InRelease [114 kB]
+	Get:4 http://archive.ubuntu.com/ubuntu focal-backports InRelease [101 kB]
+	(...)
+	root@4d4d598da900:/# apt install build-essential
+	Reading package lists... Done
+	Building dependency tree       
+	Reading state information... Done
+	The following additional packages will be installed:
+	(...)
+	0 upgraded, 84 newly installed, 0 to remove and 0 not upgraded.
+	Need to get 57.4 MB of archives.
+	After this operation, 256 MB of additional disk space will be used.
+	Do you want to continue? [Y/n] Y
+	(...)
+	Setting up gnupg (2.2.19-3ubuntu2.1) ...
+	Processing triggers for libc-bin (2.31-0ubuntu9.2) ...
+	root@4d4d598da900:/# 
+
+
+	root@4d4d598da900:/# apt install gdb
+	Reading package lists... Done
+	Building dependency tree       
+	Reading state information... Done
+	The following additional packages will be installed:
+	(...)
+	Need to get 30.1 MB of archives.
+	After this operation, 161 MB of additional disk space will be used.
+	Do you want to continue? [Y/n] 
+	(...)
+	  1. Africa  2. America  3. Antarctica  4. Australia  5. Arctic  6. Asia  7. Atlantic  8. Europe  9. Indian  10. Pacific  11. SystemV  12. US  13. Etc
+	Geographic area: 8
+
+	Please select the city or region corresponding to your time zone.
+
+	  1. Amsterdam  6. Belgrade    11. Budapest    16. Gibraltar    21. Jersey       26. Ljubljana   31. Mariehamn  36. Oslo       41. Rome        46. Simferopol  51. Tirane     56. Vatican    61. Zagreb
+	  2. Andorra    7. Berlin      12. Busingen    17. Guernsey     22. Kaliningrad  27. London      32. Minsk      37. Paris      42. Samara      47. Skopje      52. Tiraspol   57. Vienna     62. Zaporozhye
+	  3. Astrakhan  8. Bratislava  13. Chisinau    18. Helsinki     23. Kiev         28. Luxembourg  33. Monaco     38. Podgorica  43. San_Marino  48. Sofia       53. Ulyanovsk  58. Vilnius    63. Zurich
+	  4. Athens     9. Brussels    14. Copenhagen  19. Isle_of_Man  24. Kirov        29. Madrid      34. Moscow     39. Prague     44. Sarajevo    49. Stockholm   54. Uzhgorod   59. Volgograd
+	  5. Belfast    10. Bucharest  15. Dublin      20. Istanbul     25. Lisbon       30. Malta       35. Nicosia    40. Riga       45. Saratov     50. Tallinn     55. Vaduz      60. Warsaw
+	Time zone: 37
+
+
+	Current default time zone: 'Europe/Paris'
+	Local time is now:      Mon Sep 13 22:46:50 CEST 2021.
+	Universal Time is now:  Mon Sep 13 20:46:50 UTC 2021.
+	(...)
+	Setting up shared-mime-info (1.15-1) ...
+	Processing triggers for libc-bin (2.31-0ubuntu9.2) ...
+	root@4d4d598da900:/# 
+
+
 
 Utiliser la commande "exit" pour terminer la session.
 
 Sauvegarder l'environement via la commande "docker commit" dont vous avez le la documentation ci dessus. Pour un exemple, voir : https://phoenixnap.com/kb/how-to-commit-changes-to-docker-image
 
+	root@4d4d598da900:/# exit
+	exit
+	jonathan@blackbox:~$ docker commit 4d4d598da900 cnamtp:latest
+	sha256:916e13640d6e67df835229a7537b521af59c6c5770ed475c6b89f492e580ea49
+	jonathan@blackbox:~$ 
+
+
 Relancer une session docker au moyen de la commande "docker exec". Gdb et gcc sont ils toujours bien installés ?
+
+	jonathan@blackbox:~$ docker exec -it 4d4d598da900 /bin/bash
+	root@4d4d598da900:/# 
 
 ### Désactivation des mesures de sécurité ASLR
 
 Pour faciliter l'exploitation du programme vulnérable, il vous faut désactiver l'ASLR sur la machine hote.
 
 Voir comment faire ici: https://askubuntu.com/questions/318315/how-can-i-temporarily-disable-aslr-address-space-layout-randomization
+
+	jonathan@blackbox:~$ echo 0 | sudo tee /proc/sys/kernel/randomize_va_space
+	[sudo] password for jonathan: 
+	0
+	jonathan@blackbox:~$ cat /proc/sys/kernel/randomize_va_space
+	0
+	jonathan@blackbox:~$ 
+
 
 ### Copier le fichier gdbinit dans votre environement docker
 
@@ -95,10 +204,7 @@ Lancer le programme vulnérable dans gdb et lui donner un parametre:
 	gdb$ r AAAAA...
 	Starting program: /home/jonathan/CNAM/bo/bo AAAAA...
 	Welcome: AAAAA... !
-	[Inferior 1 (process 431942) exited normally]
-	-----------------------------------------------------------------------------------------------------------------------[regs]
-	  RAX: 0xError while running hook_stop:
-	Value can't be converted to integer.
+	(...)
 	gdb$ 
 
 Note: On utilise la commande "exit" pour sortir de gdb.
