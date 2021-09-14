@@ -210,6 +210,11 @@ Voir comment faire ici: https://askubuntu.com/questions/318315/how-can-i-tempora
 
 Le fichier gdbinit présent dans ce repertoire git permet d'obtenir une lecture plus simple dans gdb. Vous devez le copier (dans l'environement docker !) sous ~/.gdbinit et eventuellement /root/.gdbinit (attention au "." devant le nom de ficher). Vous pouvez sauver l'image docker via la commande "docker commit", comme vu précédemment.
 
+
+### Installer gcc-multilib
+
+	root@41d4b0b83655:~# apt install gcc-multilib
+
 ### Exploitation
 
 Nous allons réaliser l'ecriture d'un exploit, etape par etape.
